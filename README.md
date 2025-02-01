@@ -7,7 +7,7 @@ Because it is open source you can add your own custom sensors via I2C pins.
 
 <img src="images/E77board.jpg" width="600">
 
-**Important :** This may requires an amateur radio license to operate if 433 MHz is not ISM band in your country. So check regulations before using it.
+**Important :** This may require an amateur radio license to operate if 433 MHz is not ISM band in your country. So check regulations before using it.
 
 <img src="images/DevBoards.jpg" width="600">
 
