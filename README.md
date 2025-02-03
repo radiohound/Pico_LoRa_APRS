@@ -15,7 +15,7 @@ Because it is open source you can add your own custom sensors via I2C pins.
 
 - **Software** : Open Source
 - **Weight** : 6.5 grams without E77 dev board with antenna and no gps (with pins and sma connector manually removed)
-- **Weight** : 1.3 grams with only the gps module and the E77 module
+- **Weight** : 1.3 grams with only the gps module and the E77 module (aluminum shield removed)
 - **Dimensions** : x mm x x mm
 - **IDE** : Platformio
 - **Platform** : STM32 Cortex-M4 with a SX1262 built in to the chip
