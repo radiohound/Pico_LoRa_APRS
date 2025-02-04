@@ -119,28 +119,26 @@ void sendAPRSMessage(String aprsMessage){
     Serial.println(F("The supplied packet was longer than 256 bytes!"));
   
   } else if (state == RADIOLIB_ERR_TX_TIMEOUT) {
-      // timeout occured while transmitting packet
-      Serial.println(F("Timeout occured while transmitting packet!"));
+    // timeout occured while transmitting packet
+    Serial.println(F("Timeout occured while transmitting packet!"));
   
   } else {
-      // some other error occurred
-      Serial.print(F("failed, code "));
-      Serial.println(state);
+    // some other error occurred
+    Serial.print(F("failed, code "));
+    Serial.println(state);
   
   }
 }  
 
 
 String getTrackerStatusAPRSMessage(){
-  
   String message;
   String path = "";
   if (wide != "") {
-      path = "," + wide;
+    path = "," + wide;
   }
 
   message += callSign +">APLIGP"+path+":>"+statusMessage;
-
   return message;
 }
 
@@ -418,15 +416,12 @@ void setupLoRa() {
   }
 
   radio.setRxBoostedGainMode(true);
-
   Serial.println(F("All settings succesfully changed!"));  
 
  }
 
  String encodeHMSTimestamp(int hour, int minute, int second){
-
   char timestamp_buff[8];
-
   sprintf(timestamp_buff, "%02d", hour);
   sprintf(timestamp_buff + 2, "%02d", minute);
   sprintf(timestamp_buff + 4, "%02d", second);
@@ -442,7 +437,6 @@ void setupLoRa() {
 }
 
 String createLatForAPRS(double latitude) {
-
   // Convert and set latitude NMEA string Degree Minute Hundreths of minutes ddmm.hh[S,N].
   char lat_buff[10];
   int temp = 0;
@@ -479,7 +473,6 @@ String createLatForAPRS(double latitude) {
 }
 
 String createLongForAPRS(double longitude) {
-
   // Convert and set longitude NMEA string Degree Minute Hundreths of minutes ddmm.hh[E,W].
   char long_buff[10];
   int temp = 0;
@@ -518,13 +511,11 @@ String createLongForAPRS(double longitude) {
 }
 
 String getTrackerLocationAPRSMessage() {
-  
   String message;
-
   //Latitude and Longitude
   String path = "";
   if (wide != "") {
-      path = "," + wide;
+    path = "," + wide;
   }
   message += callSign +">APLIGP"+path+":/";
 
@@ -615,7 +606,7 @@ String getTrackerLocationAPRSMessage() {
   if (digipeaterMode) {
       message += txCountComment + digiTXCountComment + temperatureComment + pressureComment + voltageComment + satComment + aprsComment;
     } else {
-        message += txCountComment + temperatureComment + pressureComment + voltageComment + satComment + aprsComment;
+      message += txCountComment + temperatureComment + pressureComment + voltageComment + satComment + aprsComment;
     }
      
   return message;
@@ -897,10 +888,8 @@ void loop() {
     delay(500);
    
   } else {
-
     GpsOFF;
     ublox_high_alt_mode_enabled = false; //gps sleep mode resets high altitude mode.     
     delay(battWait * 1000);
-    
   }
 }
