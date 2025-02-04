@@ -101,34 +101,34 @@ void setFlag(void) {
 
 
 void sendAPRSMessage(String aprsMessage){
-    radio.clearPacketReceivedAction();//Disable RX interrupt.
-    receivedFlag = false;
-    Serial.println(aprsMessage);
-    int state = radio.transmit(aprsMessage);
-    if (state == RADIOLIB_ERR_NONE) {
-      // the packet was successfully transmitted
-      Serial.println(F("The packet was successfully transmitted..."));
+  radio.clearPacketReceivedAction();//Disable RX interrupt.
+  receivedFlag = false;
+  Serial.println(aprsMessage);
+  int state = radio.transmit(aprsMessage);
+  if (state == RADIOLIB_ERR_NONE) {
+    // the packet was successfully transmitted
+    Serial.println(F("The packet was successfully transmitted..."));
   
-      // print measured data rate
-      Serial.print(F("[SX1268] Datarate:\t"));
-      Serial.print(radio.getDataRate());
-      Serial.println(F(" bps"));
+    // print measured data rate
+    Serial.print(F("[SX1268] Datarate:\t"));
+    Serial.print(radio.getDataRate());
+    Serial.println(F(" bps"));
   
-    } else if (state == RADIOLIB_ERR_PACKET_TOO_LONG) {
-      // the supplied packet was longer than 256 bytes
-      Serial.println(F("The supplied packet was longer than 256 bytes!"));
+  } else if (state == RADIOLIB_ERR_PACKET_TOO_LONG) {
+    // the supplied packet was longer than 256 bytes
+    Serial.println(F("The supplied packet was longer than 256 bytes!"));
   
-    } else if (state == RADIOLIB_ERR_TX_TIMEOUT) {
+  } else if (state == RADIOLIB_ERR_TX_TIMEOUT) {
       // timeout occured while transmitting packet
       Serial.println(F("Timeout occured while transmitting packet!"));
   
-    } else {
+  } else {
       // some other error occurred
       Serial.print(F("failed, code "));
       Serial.println(state);
   
-    }
-  }  
+  }
+}  
 
 
 String getTrackerStatusAPRSMessage(){
@@ -145,9 +145,9 @@ String getTrackerStatusAPRSMessage(){
 }
 
 void sendStatusMessage(){
-    String aprsMessage = header + getTrackerStatusAPRSMessage();
-    sendAPRSMessage(aprsMessage);
-    txCount++;
+  String aprsMessage = header + getTrackerStatusAPRSMessage();
+  sendAPRSMessage(aprsMessage);
+  txCount++;
 }
 
 void setupGPS() {
@@ -179,141 +179,139 @@ void setupGPS() {
 
   myGPS.saveConfiguration(); //Save the current settings to flash and BBR  
   
-  }
+}
 
 void digiTX(){
 
-      String packet;
-      int state = radio.readData(packet);
+  String packet;
+  int state = radio.readData(packet);
           
-      if (state == RADIOLIB_ERR_NONE) {
+  if (state == RADIOLIB_ERR_NONE) {
                
-        if(packet.length() >0) {
-          // packet was successfully received
+    if(packet.length() >0) {
+      // packet was successfully received
           
-          String aprsMessage;
+      String aprsMessage;
           
-          if ((packet.substring(0, 3) == "\x3c\xff\x01") && (packet.indexOf("TCPIP") == -1) && (packet.indexOf("NOGATE") == -1)) {
-            String sender = packet.substring(3,packet.indexOf(">"));
-            if ((packet.indexOf("WIDE1-1") > 10) && (callSign != sender)) {
-              aprsMessage = packet.substring(3);                         
-              aprsMessage.replace("WIDE1-1", callSign + "*");
-              Serial.print(F("Digipeating: "));
-              sendAPRSMessage(header + aprsMessage);
-              digipeated_packet_count++;
-            }
-          } else {
-            Serial.println(packet);
-            Serial.println("LoRa Packet Ignored (first 3 bytes or TCPIP/NOGATE/RFONLY)");
-          }            
-         }
-        
-      } else if (state == RADIOLIB_ERR_CRC_MISMATCH) {
-        // packet was received, but is malformed
-        Serial.println(F("CRC error!"));
+      if ((packet.substring(0, 3) == "\x3c\xff\x01") && (packet.indexOf("TCPIP") == -1) && (packet.indexOf("NOGATE") == -1)) {
+        String sender = packet.substring(3,packet.indexOf(">"));
+        if ((packet.indexOf("WIDE1-1") > 10) && (callSign != sender)) {
+          aprsMessage = packet.substring(3);                         
+          aprsMessage.replace("WIDE1-1", callSign + "*");
+          Serial.print(F("Digipeating: "));
+          sendAPRSMessage(header + aprsMessage);
+          digipeated_packet_count++;
+        }
       } else {
-        // some other error occurred
-        Serial.print(F("failed, code "));
-        Serial.println(state);
-      }
-  
+        Serial.println(packet);
+        Serial.println("LoRa Packet Ignored (first 3 bytes or TCPIP/NOGATE/RFONLY)");
+      }            
+    }
+        
+  } else if (state == RADIOLIB_ERR_CRC_MISMATCH) {
+    // packet was received, but is malformed
+    Serial.println(F("CRC error!"));
+  } else {
+    // some other error occurred
+    Serial.print(F("failed, code "));
+    Serial.println(state);
   }
+}
 
 void enableRX(){
-    if (digipeaterMode && gpsFix && voltage > digiMinVolt && GEOFENCE_no_tx != 1) {
-          // set the function that will be called
-          // when new packet is received
-          radio.setPacketReceivedAction(setFlag);
+  if (digipeaterMode && gpsFix && voltage > digiMinVolt && GEOFENCE_no_tx != 1) {
+    // set the function that will be called
+    // when new packet is received
+    radio.setPacketReceivedAction(setFlag);
 
-          Serial.print(F("[SX1268] Starting to listen ... "));
-          int state = radio.startReceive();
-          if (state == RADIOLIB_ERR_NONE) {
-            Serial.println(F("success!"));
-          } else {
-            Serial.print(F("failed, code "));
-            Serial.println(state);
-            //while (true);
-          }          
-      }
+    Serial.print(F("[SX1268] Starting to listen ... "));
+    int state = radio.startReceive();
+    if (state == RADIOLIB_ERR_NONE) {
+      Serial.println(F("success!"));
+    } else {
+      Serial.print(F("failed, code "));
+      Serial.println(state);
+      //while (true);
+    }          
   }
+}
 
-void printGPSandSensorData()
-{
+void printGPSandSensorData(){
  
-    lastTime = millis(); //Update the timer
+  lastTime = millis(); //Update the timer
 
-    byte fixType = myGPS.getFixType();
+  byte fixType = myGPS.getFixType();
 
-    Serial.print(F("FixType: "));
-    Serial.print(fixType);    
+  Serial.print(F("FixType: "));
+  Serial.print(fixType);    
 
-    int SIV = myGPS.getSIV();
-    Serial.print(F(" Sats: "));
-    Serial.print(SIV);
+  int SIV = myGPS.getSIV();
+  Serial.print(F(" Sats: "));
+  Serial.print(SIV);
 
-    float flat = myGPS.getLatitude() / 10000000.f;
+  float flat = myGPS.getLatitude() / 10000000.f;
     
-    Serial.print(F(" Lat: "));
-    Serial.print(flat);    
+  Serial.print(F(" Lat: "));
+  Serial.print(flat);    
 
-    float flong = myGPS.getLongitude() / 10000000.f;    
-    Serial.print(F(" Long: "));
-    Serial.print(flong);        
+  float flong = myGPS.getLongitude() / 10000000.f;    
+  Serial.print(F(" Long: "));
+  Serial.print(flong);        
 
-    float altitude = myGPS.getAltitude() / 1000;
-    Serial.print(F(" Alt: "));
-    Serial.print(altitude);
-    Serial.print(F(" (m)"));
+  float altitude = myGPS.getAltitude() / 1000;
+  Serial.print(F(" Alt: "));
+  Serial.print(altitude);
+  Serial.print(F(" (m)"));
 
-    //float speed = myGPS.getGroundSpeed() * 0.0036f;
-    //Serial.print(F(" Speed: "));
-    //Serial.print(speed);
-    //Serial.print(F(" (km/h)"));
+  //float speed = myGPS.getGroundSpeed() * 0.0036f;
+  //Serial.print(F(" Speed: "));
+  //Serial.print(speed);
+  //Serial.print(F(" (km/h)"));
 
-    //long heading = myGPS.getHeading() / 100000;
-    //Serial.print(F(" Heading: "));
-    //Serial.print(heading);
-    //Serial.print(F(" (degrees)"));
+  //long heading = myGPS.getHeading() / 100000;
+  //Serial.print(F(" Heading: "));
+  //Serial.print(heading);
+  //Serial.print(F(" (degrees)"));
         
-    Serial.print(" Time: ");    
-    Serial.print(myGPS.getYear());
-    Serial.print("-");
-    Serial.print(myGPS.getMonth());
-    Serial.print("-");
-    Serial.print(myGPS.getDay());
-    Serial.print(" ");
-    Serial.print(myGPS.getHour());
-    Serial.print(":");
-    Serial.print(myGPS.getMinute());
-    Serial.print(":");
-    Serial.print(myGPS.getSecond());
+  Serial.print(" Time: ");    
+  Serial.print(myGPS.getYear());
+  Serial.print("-");
+  Serial.print(myGPS.getMonth());
+  Serial.print("-");
+  Serial.print(myGPS.getDay());
+  Serial.print(" ");
+  Serial.print(myGPS.getHour());
+  Serial.print(":");
+  Serial.print(myGPS.getMinute());
+  Serial.print(":");
+  Serial.print(myGPS.getSecond());
     
-    int16_t oversampling = 7;
-    int16_t ret;
-    int32_t temperature;
-    int32_t pressure;
-    ret = hp303b.measureTempOnce(temperature, oversampling);
-    if(ret !=0){
-         Serial.print("hp303b fail! ret = ");
-         Serial.println(ret);
-      }
+  int16_t oversampling = 7;
+  int16_t ret;
+  int32_t temperature;
+  int32_t pressure;
+  ret = hp303b.measureTempOnce(temperature, oversampling);
+  if(ret !=0){
+    Serial.print("hp303b fail! ret = ");
+    Serial.println(ret);
+  }
     
-    Serial.print(" Temp: ");
-    Serial.print(temperature);
-    Serial.print(" C");  
+  Serial.print(" Temp: ");
+  Serial.print(temperature);
+  Serial.print(" C");  
 
-    ret = hp303b.measurePressureOnce(pressure, oversampling);
-    if(ret !=0){
-         Serial.print("hp303b fail! ret = ");
-         Serial.println(ret);
-      }
+  ret = hp303b.measurePressureOnce(pressure, oversampling);
+  if(ret !=0){
+    Serial.print("hp303b fail! ret = ");
+    Serial.println(ret);
+  }
        
-    Serial.print(" Press: ");    
-    Serial.print(pressure / 100.0);
-    Serial.print(" hPa");
+  Serial.print(" Press: ");    
+  Serial.print(pressure / 100.0);
+  Serial.print(" hPa");
 
-    Serial.println();
-    delay(500);
+  Serial.println();
+  delay(500);
 }  
 
 float readBatt() {
@@ -336,26 +334,26 @@ float readBatt() {
 
 
 void setupUBloxDynamicModel() {
-    // If we are going to change the dynamic platform model, let's do it here.
-    // Possible values are:
-    // PORTABLE, STATIONARY, PEDESTRIAN, AUTOMOTIVE, SEA, AIRBORNE1g, AIRBORNE2g, AIRBORNE4g, WRIST, BIKE
-    //DYN_MODEL_AIRBORNE4g model increases ublox max. altitude limit from 12.000 meters to 50.000 meters. 
-    if (myGPS.setDynamicModel(DYN_MODEL_AIRBORNE1g) == false) // Set the dynamic model to DYN_MODEL_AIRBORNE4g
-    {
-      Serial.println(F("***!!! Warning: setDynamicModel failed !!!***"));
-    }
-    else
-    {
-      ublox_high_alt_mode_enabled = true;
-      #if defined(DEVMODE)
-        Serial.print(F("Ublox dynamic platform model (DYN_MODEL_AIRBORNE4g) changed successfully! : "));
-        Serial.println(myGPS.getDynamicModel());
-      #endif  
-    }
+  // If we are going to change the dynamic platform model, let's do it here.
+  // Possible values are:
+  // PORTABLE, STATIONARY, PEDESTRIAN, AUTOMOTIVE, SEA, AIRBORNE1g, AIRBORNE2g, AIRBORNE4g, WRIST, BIKE
+  //DYN_MODEL_AIRBORNE4g model increases ublox max. altitude limit from 12.000 meters to 50.000 meters. 
+  if (myGPS.setDynamicModel(DYN_MODEL_AIRBORNE1g) == false) {   // Set the dynamic model to DYN_MODEL_AIRBORNE4g
   
-  } 
+    Serial.println(F("***!!! Warning: setDynamicModel failed !!!***"));
+  }
+  else
+  {
+    ublox_high_alt_mode_enabled = true;
+    #if defined(DEVMODE)
+      Serial.print(F("Ublox dynamic platform model (DYN_MODEL_AIRBORNE4g) changed successfully! : "));
+      Serial.println(myGPS.getDynamicModel());
+    #endif  
+  }
+  
+} 
 
- void setupLoRa() {  
+void setupLoRa() {  
 
   // initialize SX1262 with default settings
   radio.setRfSwitchTable(rfswitch_pins, rfswitch_table);  // set up for internal SX1262 transceiver 
@@ -435,10 +433,10 @@ void setupUBloxDynamicModel() {
   timestamp_buff[6] = 'h';
 
   String timestamp;
-      for (uint8_t i = 0; i < 7; i++)
-      {
-        timestamp += String((char)timestamp_buff[i]);
-      }  
+    for (uint8_t i = 0; i < 7; i++)
+    {
+      timestamp += String((char)timestamp_buff[i]);
+    }  
 
   return timestamp;
 }
@@ -471,10 +469,10 @@ String createLatForAPRS(double latitude) {
   }
 
   String latStr;
-      for (uint8_t i = 0; i < 8; i++)
-      {
-        latStr += String((char)lat_buff[i]);
-      }  
+    for (uint8_t i = 0; i < 8; i++)
+    {
+      latStr += String((char)lat_buff[i]);
+    }  
 
   return latStr;
 
@@ -511,10 +509,10 @@ String createLongForAPRS(double longitude) {
   }
 
   String longStr;
-      for (uint8_t i = 0; i < 9; i++)
-      {
-        longStr += String((char)long_buff[i]);
-      }  
+    for (uint8_t i = 0; i < 9; i++)
+    {
+      longStr += String((char)long_buff[i]);
+    }  
 
   return longStr;
 }
@@ -618,7 +616,7 @@ String getTrackerLocationAPRSMessage() {
       message += txCountComment + digiTXCountComment + temperatureComment + pressureComment + voltageComment + satComment + aprsComment;
     } else {
         message += txCountComment + temperatureComment + pressureComment + voltageComment + satComment + aprsComment;
-      }
+    }
      
   return message;
 }
@@ -632,14 +630,12 @@ void sendLocationMessage(){
 }
 
 
-int32_t pointInPolygonF(int32_t polyCorners, float * polygon, float latitude, float longitude)
-{
+int32_t pointInPolygonF(int32_t polyCorners, float * polygon, float latitude, float longitude){
   int32_t i;
   int32_t j = polyCorners * 2 - 2;
   int32_t oddNodes = 0;
 
-  for(i = 0; i < polyCorners * 2; i += 2)
-  {
+  for(i = 0; i < polyCorners * 2; i += 2) {
     if((polygon[i + 1] < latitude && polygon[j + 1] >= latitude
     || polygon[j + 1] < latitude && polygon[i + 1] >= latitude)
     && (polygon[i] <= longitude || polygon[j] <= longitude))
@@ -654,89 +650,91 @@ int32_t pointInPolygonF(int32_t polyCorners, float * polygon, float latitude, fl
   return oddNodes;
 }
 
-void GEOFENCE_position(float latitude, float longitude)
-{
+void GEOFENCE_position(float latitude, float longitude){
 
-      float  UKF[] = {
-        -0.65920,   60.97310,
-        -7.58060,   58.07790,
-        -8.21780,   54.23960,
-        -4.76810,   53.80070,
-        -5.86670,   49.76710,
-        1.30740,    50.85450,
-        1.86770,    52.78950,
-        -2.04350,   55.97380,
-        -0.65920,   60.97310
-      }; 
+  float  UKF[] = {
+    -0.65920,   60.97310,
+    -7.58060,   58.07790,
+    -8.21780,   54.23960,
+    -4.76810,   53.80070,
+    -5.86670,   49.76710,
+    1.30740,    50.85450,
+    1.86770,    52.78950,
+    -2.04350,   55.97380,
+    -0.65920,   60.97310
+  }; 
   
-      float  PolandF[] = {
-        54.439234, 14.103456,
-        51.022075, 14.897034,
-        49.537732, 18.860178,
-        49.113780, 22.481393,
-        52.742317, 23.889542,
-        54.156275, 23.456098,
-        54.439234, 14.103456
-      };      
-      static float LatviaF[] = {
-        26.64180,   55.68380,
-        28.17990,   56.20670,
-        27.78440,   57.33250,
-        25.00490,   58.00230,
-        24.14790,   57.17200,
-        21.78590,   57.68650,
-        20.81910,   56.07200,
-        22.19240,   56.44430,
-        25.68600,   56.18230,
-        26.64180,   55.68380
-      };      
-      static float YemenF[] = {
-        52.20302, 19.48287,
-        41.92009, 17.42198,
-        43.59620, 12.27820,
-        53.68201, 15.80024,
-        52.20302, 19.48287
-      };
-      static float North_KoreaF[] = {
-        130.14189, 43.21627,
-        124.03574, 39.8949,
-        125.18292, 37.39202,
-        128.47240, 38.66888,
-        130.69478, 42.3274,
-        130.14189, 43.21627
-      };             
+  float  PolandF[] = {
+    54.439234, 14.103456,
+    51.022075, 14.897034,
+    49.537732, 18.860178,
+    49.113780, 22.481393,
+    52.742317, 23.889542,
+    54.156275, 23.456098,
+    54.439234, 14.103456
+  };      
 
-      if(pointInPolygonF(9, UKF, latitude, longitude) == 1){
-          GEOFENCE_no_tx = 1; //Airborne TX is not allowed in UK
-          GEOFENCE_APRS_frequency = 439912500;
-          GEOFENCE_APRS_spreading_factor = 12;
-          GEOFENCE_APRS_coding_rate = 5;
-        } else if(pointInPolygonF(7, PolandF, latitude, longitude) == 1){
-          GEOFENCE_no_tx = 0;
-          GEOFENCE_APRS_frequency = 434855000;
-          GEOFENCE_APRS_spreading_factor = 9;
-          GEOFENCE_APRS_coding_rate = 7;          
-        } else if(pointInPolygonF(10, LatviaF, latitude, longitude) == 1){
-          GEOFENCE_no_tx = 1;
-          GEOFENCE_APRS_frequency = 433775000;
-          GEOFENCE_APRS_spreading_factor = 12;
-          GEOFENCE_APRS_coding_rate = 5;                
-        } else if(pointInPolygonF(5, YemenF, latitude, longitude) == 1){
-          GEOFENCE_no_tx = 1;
-          GEOFENCE_APRS_frequency = 433775000;
-          GEOFENCE_APRS_spreading_factor = 12;
-          GEOFENCE_APRS_coding_rate = 5; 
-        } else if(pointInPolygonF(6, North_KoreaF, latitude, longitude) == 1){
-          GEOFENCE_no_tx = 1;
-          GEOFENCE_APRS_frequency = 433775000;
-          GEOFENCE_APRS_spreading_factor = 12;
-          GEOFENCE_APRS_coding_rate = 5;              
-        } else {
-          GEOFENCE_no_tx = 0;
-          GEOFENCE_APRS_frequency = 433775000;
-          GEOFENCE_APRS_spreading_factor = 12;
-          GEOFENCE_APRS_coding_rate = 5;      
-        }
+  static float LatviaF[] = {
+    26.64180,   55.68380,
+    28.17990,   56.20670,
+    27.78440,   57.33250,
+    25.00490,   58.00230,
+    24.14790,   57.17200,
+    21.78590,   57.68650,
+    20.81910,   56.07200,
+    22.19240,   56.44430,
+    25.68600,   56.18230,
+    26.64180,   55.68380
+  };      
+  
+  static float YemenF[] = {
+    52.20302, 19.48287,
+    41.92009, 17.42198,
+    43.59620, 12.27820,
+    53.68201, 15.80024,
+    52.20302, 19.48287
+  };
+  
+  static float North_KoreaF[] = {
+    130.14189, 43.21627,
+    124.03574, 39.8949,
+    125.18292, 37.39202,
+    128.47240, 38.66888,
+    130.69478, 42.3274,
+    130.14189, 43.21627
+  };             
+
+  if(pointInPolygonF(9, UKF, latitude, longitude) == 1){
+    GEOFENCE_no_tx = 1; //Airborne TX is not allowed in UK
+    GEOFENCE_APRS_frequency = 439912500;
+    GEOFENCE_APRS_spreading_factor = 12;
+    GEOFENCE_APRS_coding_rate = 5;
+  } else if(pointInPolygonF(7, PolandF, latitude, longitude) == 1){
+    GEOFENCE_no_tx = 0;
+    GEOFENCE_APRS_frequency = 434855000;
+    GEOFENCE_APRS_spreading_factor = 9;
+    GEOFENCE_APRS_coding_rate = 7;          
+  } else if(pointInPolygonF(10, LatviaF, latitude, longitude) == 1){
+    GEOFENCE_no_tx = 1;
+    GEOFENCE_APRS_frequency = 433775000;
+    GEOFENCE_APRS_spreading_factor = 12;
+    GEOFENCE_APRS_coding_rate = 5;                
+  } else if(pointInPolygonF(5, YemenF, latitude, longitude) == 1){
+    GEOFENCE_no_tx = 1;
+    GEOFENCE_APRS_frequency = 433775000;
+    GEOFENCE_APRS_spreading_factor = 12;
+    GEOFENCE_APRS_coding_rate = 5; 
+  } else if(pointInPolygonF(6, North_KoreaF, latitude, longitude) == 1){
+    GEOFENCE_no_tx = 1;
+    GEOFENCE_APRS_frequency = 433775000;
+    GEOFENCE_APRS_spreading_factor = 12;
+    GEOFENCE_APRS_coding_rate = 5;              
+  } else {
+    GEOFENCE_no_tx = 0;
+    GEOFENCE_APRS_frequency = 433775000;
+    GEOFENCE_APRS_spreading_factor = 12;
+    GEOFENCE_APRS_coding_rate = 5;      
+  }
 }
 
 void configureFreqbyLocation() {
@@ -783,7 +781,6 @@ void setup() {
   Serial.println();
   Serial.println(F("Starting"));
   Serial.println();
-  //freeMem();
 
   Serial.print(F("APRS CallSign: "));
   Serial.println(callSign);
@@ -806,7 +803,6 @@ void loop() {
 
       Serial.println(F("LoRa setup"));
       setupLoRa();
-      //freeMem();
       
     }
 
@@ -848,31 +844,30 @@ void loop() {
         }
         
         if (GEOFENCE_no_tx != 1) {
-            sendLocationMessage();
-            lastPacket = millis();          
+          sendLocationMessage();
+          lastPacket = millis();          
         }                 
-        //freeMem();
       }
 
 
-        #if defined(DEVMODE)
-          printGPSandSensorData();
-        #endif    
+      #if defined(DEVMODE)
+        printGPSandSensorData();
+      #endif    
 
     }
 
     if(receivedFlag) {
-        // reset flag
-        receivedFlag = false;
-        //Serial.println(F("[SX1268] Received packet!"));
-        digiTX();             
+      // reset flag
+      receivedFlag = false;
+      //Serial.println(F("[SX1268] Received packet!"));
+      digiTX();             
     }
 
     //this code block protecting serial connected (3V + 3V) super caps from overcharging by powering on GPS module.
     //GPS module uses too much power while on, so if voltage is too high for supercaps, GPS ON.
     if (!digipeaterMode && readBatt() > 6.5) {
-        GpsON;
-        delay(500);
+      GpsON;
+      delay(500);
     
     } else {
 
@@ -898,8 +893,8 @@ void loop() {
   //this code block protecting serial connected (3V + 3V) super caps from overcharging by powering on GPS module.
   //GPS module uses too much power while on, so if voltage is too high for supercaps, GPS ON.
   if (!digipeaterMode && readBatt() > 6.5) {
-       GpsON;
-       delay(500);
+    GpsON;
+    delay(500);
    
   } else {
 
