@@ -593,7 +593,7 @@ String getTrackerLocationAPRSMessage() {
   float pressureF = pressure / 100.0f; //Pa to hPa
   char pressure_buff[6];
   dtostrf(pressureF, 7, 2, pressure_buff);     
-  for (uint8_t i = 0; i < 7; i++)
+  for (uint8_t i = 0; i < 6; i++)          
   {
     pressure_str += String((char)pressure_buff[i]);
   }
